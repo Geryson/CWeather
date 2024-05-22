@@ -1,12 +1,15 @@
 package com.gery.cweather
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.bumptech.glide.Glide
 import com.gery.cweather.api.RetrofitClient
 import com.gery.cweather.api.WeatherAPI
 import com.gery.cweather.api.WeatherResponse
@@ -49,6 +52,9 @@ class MainActivity : AppCompatActivity() {
                         call: Call<WeatherResponse>,
                         response: retrofit2.Response<WeatherResponse>
                     ) {
+                        val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                        inputMethodManager.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
+
                         Log.d("RETROFIT", response.body().toString())
                         val coord = response.body()?.coord
                         val coordString = coord?.lat.toString() + ", " + coord?.lon.toString()
@@ -68,6 +74,13 @@ class MainActivity : AppCompatActivity() {
 
                         binding.tvValueMinimum.text = response.body()?.main?.temp_min.toString()
                         binding.tvValueMaximum.text = response.body()?.main?.temp_max.toString()
+
+                        val iconURL = "https://openweathermap.org/img/wn/" + response.body()?.weather?.get(0)?.icon + "@2x.png"
+                        val iconContainer = binding.ivWeatherIcon
+
+                        Glide.with(this@MainActivity)
+                            .load(iconURL)
+                            .into(iconContainer)
                     }
                 }
                 )
